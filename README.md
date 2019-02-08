@@ -1,7 +1,7 @@
 # lampstack
 Apache - PHP - MariaDB
 ```
-bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/aristosv/lampstack-opencart/master/lamp)
+bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/aristosv/lampstack/master/lampstack)
 ```
 Run the command above on a clean, minimal installation of Debian Stretch.
 
