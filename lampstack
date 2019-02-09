@@ -1,15 +1,13 @@
 echo ==================================================================
-echo this will install apache, php and mariadb
-echo it will also secure mariadb and create the first database and user
+echo this will install apache, php, mariadb and phpmyadmin
 echo optionally it can configure letsencrypt and gmail php mail
 echo you will be asked a few questions to automate the installation
 echo ==================================================================
 read -p "press enter to continue"
 
 echo set a root password for mariadb: ; read database_root_pass
-echo enter a name for the first database: ; read first_database_name
-echo enter a username for the first database: ; read first_database_user
-echo enter a password for the first database: ; read first_database_pass
+echo enter a username for the phpmyadmin user: ; read phpmyadmin_user
+echo enter a password for the phpmyadmin user: ; read phpmyadmin_pass
 echo what is the domain name you will be hosting on this server: ; read domain_name
 
 echo updating
@@ -28,7 +26,10 @@ echo installing mariadb
 apt-get install -y mariadb-server > /dev/null 2>&1
 
 echo installing php
-apt-get install -y php php-mysql libapache2-mod-php php-curl php-gd php-zip > /dev/null 2>&1
+apt-get install -y php php-mysql libapache2-mod-php > /dev/null 2>&1
+
+echo installing unzip
+apt-get install -y unzip > /dev/null 2>&1
 
 echo securing mariadb
 echo setting mariadb root password
@@ -46,14 +47,23 @@ mysql --user="root" --password="" --execute="DELETE FROM mysql.db WHERE Db='test
 echo flushing privileges
 mysql --user="root" --password="" --execute="FLUSH PRIVILEGES;"
 
-echo creating first database
-mysql --user="root" --password="$database_root_pass" --execute="CREATE DATABASE $first_database_name;"
-mysql --user="root" --password="$database_root_pass" --execute="CREATE USER '$first_database_user'@'localhost' IDENTIFIED BY '$first_database_pass';"
-mysql --user="root" --password="$database_root_pass" --execute="GRANT ALL ON $first_database_name.* TO '$first_database_user'@'localhost' IDENTIFIED BY '$first_database_pass' WITH GRANT OPTION;"
+echo creating phpmyadmin user
+mysql --user="root" --password="$database_root_pass" --execute="CREATE USER '$phpmyadmin_user'@'localhost' IDENTIFIED BY '$phpmyadmin_pass';"
+mysql --user="root" --password="$database_root_pass" --execute="GRANT ALL PRIVILEGES ON *.* TO '$phpmyadmin_user'@'localhost';"
 mysql --user="root" --password="$database_root_pass" --execute="FLUSH PRIVILEGES;"
 
 echo creating website folder
 mkdir /var/www/html/$domain_name/
+
+echo downloading phpmyadmin
+wget --no-check-certificate https://files.phpmyadmin.net/phpMyAdmin/4.8.5/phpMyAdmin-4.8.5-all-languages.zip -P /var/www/html/$domain_name > /dev/null 2>&1
+
+echo extracting phpmyadmin
+unzip /var/www/html/$domain_name/phpMyAdmin-4.8.5-all-languages.zip -d /var/www/html/$domain_name > /dev/null 2>&1
+
+echo cleaning up
+rm /var/www/html/$domain_name/phpMyAdmin-4.8.5-all-languages.zip
+mv /var/www/html/$domain_name/phpMyAdmin-4.8.5-all-languages /var/www/html/$domain_name/phpmyadmin
 
 echo setting permissions
 chown -R www-data:www-data /var/www/html/$domain_name
@@ -147,4 +157,7 @@ echo running certification wizard
 certbot --apache -d $domain_name
 fi
 
+echo ====================================================================================
 echo installation complete. You can now visit $domain_name
+echo use username [$phpmyadmin_user] and password [$phpmyadmin_pass] to access phpmyadmin
+echo ====================================================================================
