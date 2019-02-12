@@ -1,5 +1,6 @@
 # lampstack
 Apache - PHP - MariaDB - phpMyAdmin
+
 Run the command below on a clean, minimal installation of Debian Stretch.
 ```
 bash <(wget --no-check-certificate -qO- https://raw.githubusercontent.com/aristosv/lampstack/master/lampstack)
